@@ -19,3 +19,6 @@ apply:
 
 delete:
 	$(KUBECTL) delete -f resources
+
+ignore-overrides-file:
+	git update-index --assume-unchanged Makefile.overrides.mk
