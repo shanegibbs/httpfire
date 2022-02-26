@@ -28,6 +28,10 @@ func NewAgent(ctx context.Context, cancel context.CancelFunc, config AgentConfig
 	}
 }
 
+func (a *Agent) SetConfig(config AgentConfig) {
+	a.config = config
+}
+
 func (a *Agent) Start() {
 	if a.stopSession != nil {
 		log.Println("agent already running")
@@ -118,7 +122,7 @@ func (a *Agent) ExecuteOperation(ctx context.Context, id, i uint, client *http.C
 	} else if err != nil {
 		msg = fmt.Sprintf("error: %v", err)
 	} else {
-		msg = res.Status
+		msg = fmt.Sprintf("%s %s %v", a.config.URL, res.Status, latency)
 		statusCode = res.StatusCode
 	}
 
