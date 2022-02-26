@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	err := agent.Main()
+	err := agent.Main(agent.DefaultServerConfig())
 	if err != nil {
-		log.Fatalf("error: %v", agent.Main())
+		log.Fatalf("error: %v", err)
 	}
 }

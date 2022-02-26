@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -13,14 +14,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type AgentConfig struct {
-	URL         string
-	Timeout     time.Duration
-	ThreadCount uint
-	LogRequests bool
+func DefaultServerConfig() ServerConfig {
+	return ServerConfig{
+		ListenAddr: "0.0.0.0:8080",
+	}
 }
 
-func Main() error {
+func Main(serverConfig ServerConfig) error {
 	ctx := context.Background()
 	ctx, triggerShutdown := context.WithCancel(ctx)
 
@@ -42,10 +42,10 @@ func Main() error {
 
 	agent := NewAgent(ctx, triggerShutdown, config)
 
-	return RunAgentServer(ctx, agent)
+	return RunAgentServer(ctx, serverConfig, agent)
 }
 
-func RunAgentServer(ctx context.Context, agent *Agent) error {
+func RunAgentServer(ctx context.Context, serverConfig ServerConfig, agent *Agent) error {
 
 	mux := http.NewServeMux()
 
@@ -59,21 +59,58 @@ func RunAgentServer(ctx context.Context, agent *Agent) error {
 		w.WriteHeader(200)
 	})
 	mux.HandleFunc("/start", func(w http.ResponseWriter, r *http.Request) {
-		agent.Start()
-		w.WriteHeader(200)
+		switch r.Method {
+		case "POST":
+
+			config := AgentConfig{}
+			err := json.NewDecoder(r.Body).Decode(&config)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			agent.SetConfig(config)
+			agent.Start()
+			w.WriteHeader(200)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
 	})
 	mux.HandleFunc("/stop", func(w http.ResponseWriter, r *http.Request) {
-		agent.Stop()
-		w.WriteHeader(200)
+		switch r.Method {
+		case "POST":
+			agent.Stop()
+			w.WriteHeader(200)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
 	})
 	mux.HandleFunc("/restart", func(w http.ResponseWriter, r *http.Request) {
-		agent.Stop()
-		agent.Start()
-		w.WriteHeader(200)
+		switch r.Method {
+		case "POST":
+			agent.Stop()
+			agent.Start()
+			w.WriteHeader(200)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	})
+	mux.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			w.WriteHeader(http.StatusOK)
+			w.Header().Set("Content-Type", "application/json")
+			err := json.NewEncoder(w).Encode(agent.config)
+			if err != nil {
+				log.Printf("failed to write response: %v", err)
+			}
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
 	})
 
 	srv := &http.Server{
-		Addr:    "0.0.0.0:8080",
+		Addr:    serverConfig.ListenAddr,
 		Handler: logRequestHandler(mux),
 	}
 
@@ -93,16 +130,10 @@ func RunAgentServer(ctx context.Context, agent *Agent) error {
 
 func logRequestHandler(h http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-
-		// call the original http.Handler we're wrapping
 		h.ServeHTTP(w, r)
-
 		uri := r.URL.String()
 		method := r.Method
 		log.Println(method, uri)
 	}
-
-	// http.HandlerFunc wraps a function so that it
-	// implements http.Handler interface
 	return http.HandlerFunc(fn)
 }
