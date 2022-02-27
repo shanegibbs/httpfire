@@ -4,7 +4,7 @@ Accurately test your web infrastructure. Understand your limits and failure scen
 
 [Roadmap](https://github.com/shanegibbs/httpfire/projects/1)
 
-![diagram](https://user-images.githubusercontent.com/2838876/155901455-1aab9efa-5de1-4f30-a3fc-68a109e90668.png)
+![diagram](https://user-images.githubusercontent.com/2838876/155901542-7da22bb0-0f73-4f6f-aabc-8a25f775d201.png)
 
 ## Development
 
