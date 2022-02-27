@@ -5,8 +5,9 @@ WORKDIR /work
 ADD go.* .
 ADD cmd cmd
 ADD pkg pkg
-RUN go build -o httpfire ./cmd/agent/main.go
+RUN go build -o agent ./cmd/agent/main.go
+RUN go build -o director ./cmd/director/main.go
 
 FROM alpine:3.15
-COPY --from=builder /work/httpfire /
-CMD /httpfire
+COPY --from=builder /work/agent /usr/local/bin/
+COPY --from=builder /work/director /usr/local/bin/

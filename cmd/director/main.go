@@ -13,8 +13,13 @@ func main() {
 	ctx, shutdown := context.WithCancel(ctx)
 	common.HandleSigterm(shutdown)
 
-	err := director.Main(ctx, shutdown, director.DefaultServerConfig())
+	config, err := director.LoadConfig()
 	if err != nil {
-		log.Printf("error: %v", err)
+		log.Fatalf("config error: %v", err)
+	}
+
+	err = director.Main(ctx, shutdown, *config)
+	if err != nil {
+		log.Fatalf("error: %v", err)
 	}
 }

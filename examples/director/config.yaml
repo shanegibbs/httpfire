@@ -1,0 +1,7 @@
+listen_addr: "0.0.0.0:8080"
+discovery:
+  static:
+    endpoints:
+    - http://http-fire-agent-1:8080
+    - http://http-fire-agent-2:8080
+    - http://http-fire-agent-3:8080

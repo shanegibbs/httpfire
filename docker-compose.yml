@@ -1,0 +1,19 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  director:
+    build: .
+    command: director
+    ports:
+    - "8080:8080"
+    environment:
+    - HTTPFIRE_CONFIG=/config/config.yaml
+    volumes:
+    - ./examples/director:/config:ro
+  agent:
+    build: .
+    command: agent
+    ports:
+    - "8080"
+    deploy:
+      mode: replicated
+      replicas: 4

@@ -13,14 +13,14 @@ import (
 
 func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
-		ListenAddr: "0.0.0.0:8081",
+		ListenAddr: "0.0.0.0:8080",
 	}
 }
 
 func Main(ctx context.Context, shutdown context.CancelFunc, serverConfig ServerConfig) error {
 
 	config := AgentConfig{
-		URL:         "http://127.0.0.1:8081",
+		URL:         "",
 		Timeout:     1 * time.Second,
 		ThreadCount: 4,
 		LogRequests: true,
