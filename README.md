@@ -12,7 +12,7 @@ Requires:
 - `docker`
 - `docker-compose`
 
-Run in local mode for development:
+Run in local mode for development
 
 ```shell
 $ make local
@@ -20,25 +20,25 @@ $ make local
 
 ## Docker
 
-Build and run a local cluster with docker compose:
+Build and run a local cluster with docker compose
 
 ```shell
 $ make up
 ```
 
-Start a test plan:
+Start a test plan
 
 ```shell
 $ make post-start
 ```
 
-Stop current test plan:
+Stop current test plan
 
 ```shell
 $ make post-stop
 ```
 
-Cleanup (remove docker containers etc):
+Cleanup (remove docker containers etc)
 
 ```shell
 $ make clean
