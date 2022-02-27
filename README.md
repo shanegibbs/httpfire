@@ -1,5 +1,7 @@
 # httpfire
 
+Accurately test your web infrastructure. Understand your limits and failure scenarios. Test and validate scaling strategies.
+
 Agent
 - Start
 - Stop
