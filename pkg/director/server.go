@@ -1,4 +1,4 @@
-package agent
+package director
 
 import (
 	"context"
@@ -9,52 +9,56 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/shanegibbs/httpfire/pkg/agent"
 )
 
 func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
-		ListenAddr: "0.0.0.0:8081",
+		ListenAddr: "0.0.0.0:8080",
+		AgentEndpoints: []string{
+			"http://127.0.0.1:8081",
+			"http://127.0.0.1:8082",
+		},
 	}
 }
 
 func Main(ctx context.Context, shutdown context.CancelFunc, serverConfig ServerConfig) error {
+	director := NewDirector(ctx, shutdown, serverConfig)
 
-	config := AgentConfig{
-		URL:         "http://127.0.0.1:8081",
-		Timeout:     1 * time.Second,
-		ThreadCount: 4,
-		LogRequests: true,
+	for _, ep := range serverConfig.AgentEndpoints {
+		err := director.AddAgent(ep)
+		if err != nil {
+			return err
+		}
 	}
 
-	agent := NewAgent(ctx, shutdown, config)
-	return RunAgentServer(ctx, serverConfig, agent)
+	return RunDirectorServer(ctx, serverConfig, director)
 }
 
-func RunAgentServer(ctx context.Context, serverConfig ServerConfig, agent *LocalAgent) error {
+func RunDirectorServer(ctx context.Context, serverConfig ServerConfig, director *Director) error {
 
 	mux := http.NewServeMux()
 
 	r := prometheus.NewRegistry()
-	r.MustRegister(opsTotalMetrics)
-	r.MustRegister(latencyMetrics)
+	// r.MustRegister(opsTotalMetrics)
+	// r.MustRegister(latencyMetrics)
 	mux.Handle("/metrics", promhttp.HandlerFor(r, promhttp.HandlerOpts{}))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// time.Sleep(100 * time.Millisecond)
 		w.WriteHeader(200)
 	})
 	mux.HandleFunc("/start", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
 
-			config := AgentConfig{}
+			config := agent.AgentConfig{}
 			err := json.NewDecoder(r.Body).Decode(&config)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			agent.Start(config)
+			director.Start(config)
 			w.WriteHeader(200)
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -63,31 +67,8 @@ func RunAgentServer(ctx context.Context, serverConfig ServerConfig, agent *Local
 	mux.HandleFunc("/stop", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
-			agent.Stop()
+			director.Stop()
 			w.WriteHeader(200)
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
-	})
-	// mux.HandleFunc("/restart", func(w http.ResponseWriter, r *http.Request) {
-	// 	switch r.Method {
-	// 	case "POST":
-	// 		agent.Stop()
-	// 		agent.Start()
-	// 		w.WriteHeader(200)
-	// 	default:
-	// 		w.WriteHeader(http.StatusMethodNotAllowed)
-	// 	}
-	// })
-	mux.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			w.WriteHeader(http.StatusOK)
-			w.Header().Set("Content-Type", "application/json")
-			err := json.NewEncoder(w).Encode(agent.config)
-			if err != nil {
-				log.Printf("failed to write response: %v", err)
-			}
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
@@ -103,10 +84,10 @@ func RunAgentServer(ctx context.Context, serverConfig ServerConfig, agent *Local
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	log.Printf("Agent listening on %v...", srv.Addr)
+	log.Printf("Director listening on %v...", srv.Addr)
 
 	<-ctx.Done()
-	log.Print("Agent shutting down...")
+	log.Print("Director shutting down...")
 
 	shutdownCtx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	return srv.Shutdown(shutdownCtx)

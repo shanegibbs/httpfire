@@ -11,8 +11,14 @@ LISTEN_ADDR=127.0.0.1:8080
 test:
 	go test ./...
 
+local:
+	go run ./cmd/local/main.go
+
 agent:
 	go run ./cmd/agent/main.go
+
+director:
+	go run ./cmd/director/main.go
 
 build:
 	docker build -t $(IMAGE) .

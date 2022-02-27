@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/shanegibbs/httpfire/pkg/agent"
 	"github.com/shanegibbs/httpfire/pkg/common"
+	"github.com/shanegibbs/httpfire/pkg/director"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	ctx, shutdown := context.WithCancel(ctx)
 	common.HandleSigterm(shutdown)
 
-	err := agent.Main(ctx, shutdown, agent.DefaultServerConfig())
+	err := director.Main(ctx, shutdown, director.DefaultServerConfig())
 	if err != nil {
 		log.Printf("error: %v", err)
 	}
