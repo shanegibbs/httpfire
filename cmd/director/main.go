@@ -1,14 +1,20 @@
 package main
 
 import (
+	"context"
 	"log"
 
+	"github.com/shanegibbs/httpfire/pkg/common"
 	"github.com/shanegibbs/httpfire/pkg/director"
 )
 
 func main() {
-	err := director.Main(director.DefaultServerConfig())
+	ctx := context.Background()
+	ctx, shutdown := context.WithCancel(ctx)
+	common.HandleSigterm(shutdown)
+
+	err := director.Main(ctx, shutdown, director.DefaultServerConfig())
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Printf("error: %v", err)
 	}
 }

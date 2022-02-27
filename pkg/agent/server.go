@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -20,9 +17,7 @@ func DefaultServerConfig() ServerConfig {
 	}
 }
 
-func Main(serverConfig ServerConfig) error {
-	ctx := context.Background()
-	ctx, triggerShutdown := context.WithCancel(ctx)
+func Main(ctx context.Context, shutdown context.CancelFunc, serverConfig ServerConfig) error {
 
 	config := AgentConfig{
 		URL:         "http://127.0.0.1:8081",
@@ -31,17 +26,7 @@ func Main(serverConfig ServerConfig) error {
 		LogRequests: true,
 	}
 
-	{
-		sigterm := make(chan os.Signal, 1)
-		signal.Notify(sigterm, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-		go func() {
-			<-sigterm
-			triggerShutdown()
-		}()
-	}
-
-	agent := NewAgent(ctx, triggerShutdown, config)
-
+	agent := NewAgent(ctx, shutdown, config)
 	return RunAgentServer(ctx, serverConfig, agent)
 }
 

@@ -1,14 +1,20 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/shanegibbs/httpfire/pkg/agent"
+	"github.com/shanegibbs/httpfire/pkg/common"
 )
 
 func main() {
-	err := agent.Main(agent.DefaultServerConfig())
+	ctx := context.Background()
+	ctx, shutdown := context.WithCancel(ctx)
+	common.HandleSigterm(shutdown)
+
+	err := agent.Main(ctx, shutdown, agent.DefaultServerConfig())
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Printf("error: %v", err)
 	}
 }

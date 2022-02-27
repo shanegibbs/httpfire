@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -19,26 +16,21 @@ func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
 		ListenAddr: "0.0.0.0:8080",
 		AgentEndpoints: []string{
-			"http://127.0.0.1:80801",
-			"http://127.0.0.1:80802",
+			"http://127.0.0.1:8081",
+			"http://127.0.0.1:8082",
 		},
 	}
 }
 
-func Main(serverConfig ServerConfig) error {
-	ctx := context.Background()
-	ctx, triggerShutdown := context.WithCancel(ctx)
+func Main(ctx context.Context, shutdown context.CancelFunc, serverConfig ServerConfig) error {
+	director := NewDirector(ctx, shutdown, serverConfig)
 
-	{
-		sigterm := make(chan os.Signal, 1)
-		signal.Notify(sigterm, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-		go func() {
-			<-sigterm
-			triggerShutdown()
-		}()
+	for _, ep := range serverConfig.AgentEndpoints {
+		err := director.AddAgent(ep)
+		if err != nil {
+			return err
+		}
 	}
-
-	director := NewDirector(ctx, triggerShutdown, serverConfig)
 
 	return RunDirectorServer(ctx, serverConfig, director)
 }
