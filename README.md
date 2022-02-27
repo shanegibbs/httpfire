@@ -11,6 +11,6 @@ Requires:
 
 Run locally:
 
-```shell
+```bash
 $ make up
 ```
