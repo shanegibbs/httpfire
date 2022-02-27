@@ -17,3 +17,9 @@ Run locally:
 ```shell
 $ make up
 ```
+
+Cleanup (remove docker containers etc):
+
+```shell
+$ make clean
+```
