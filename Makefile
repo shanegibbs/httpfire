@@ -14,6 +14,9 @@ test:
 agent:
 	go run ./cmd/agent/main.go
 
+director:
+	go run ./cmd/director/main.go
+
 build:
 	docker build -t $(IMAGE) .
 

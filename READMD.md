@@ -5,7 +5,7 @@ Agent
 - Stop
 - Update config (restart)
 
-CNC
+Director (push model)
 - Broadcast
   - Start
   - Stop

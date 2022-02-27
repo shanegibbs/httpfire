@@ -12,15 +12,20 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type Agent struct {
+type Agent interface {
+	Start(config AgentConfig) error
+	Stop() error
+}
+
+type LocalAgent struct {
 	ctx         context.Context
 	agentAbort  context.CancelFunc
 	stopSession context.CancelFunc
 	config      AgentConfig
 }
 
-func NewAgent(ctx context.Context, cancel context.CancelFunc, config AgentConfig) *Agent {
-	return &Agent{
+func NewAgent(ctx context.Context, cancel context.CancelFunc, config AgentConfig) *LocalAgent {
+	return &LocalAgent{
 		ctx:         ctx,
 		agentAbort:  cancel,
 		stopSession: nil,
@@ -28,15 +33,13 @@ func NewAgent(ctx context.Context, cancel context.CancelFunc, config AgentConfig
 	}
 }
 
-func (a *Agent) SetConfig(config AgentConfig) {
-	a.config = config
-}
-
-func (a *Agent) Start() {
+func (a *LocalAgent) Start(config AgentConfig) error {
 	if a.stopSession != nil {
 		log.Println("agent already running")
-		return
+		return nil
 	}
+
+	a.config = config
 
 	workerCtx, stopSession := context.WithCancel(a.ctx)
 	a.stopSession = stopSession
@@ -59,14 +62,16 @@ func (a *Agent) Start() {
 			}()
 		}
 	}()
+	return nil
 }
 
-func (a *Agent) Stop() {
+func (a *LocalAgent) Stop() error {
 	log.Println("Stopping")
 	if a.stopSession != nil {
 		a.stopSession()
 		a.stopSession = nil
 	}
+	return nil
 }
 
 var (
@@ -79,7 +84,7 @@ var (
 	})
 )
 
-func (a *Agent) WorkerFunc(id uint, ctx context.Context) error {
+func (a *LocalAgent) WorkerFunc(id uint, ctx context.Context) error {
 	var i uint
 	client := &http.Client{}
 
@@ -100,7 +105,7 @@ func (a *Agent) WorkerFunc(id uint, ctx context.Context) error {
 	}
 }
 
-func (a *Agent) ExecuteOperation(ctx context.Context, id, i uint, client *http.Client) error {
+func (a *LocalAgent) ExecuteOperation(ctx context.Context, id, i uint, client *http.Client) error {
 	reqCtx, cancel := context.WithTimeout(ctx, a.config.Timeout)
 	defer cancel()
 
