@@ -5,10 +5,10 @@ Accurately test your web infrastructure. Understand your limits and failure scen
 ## Development
 
 Requires:
+- `go >= 1.17.6`
+- `make`
 - `docker`
 - `docker-compose`
-- `make`
-- `go >= 1.17.6`
 
 Run locally:
 
