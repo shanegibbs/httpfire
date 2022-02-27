@@ -4,6 +4,11 @@ Accurately test your web infrastructure. Understand your limits and failure scen
 
 ## Development
 
+Requires:
+- `docker`
+- `docker-compose`
+- `make`
+
 Run locally:
 
 ```shell
