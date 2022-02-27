@@ -12,7 +12,15 @@ Requires:
 - `docker`
 - `docker-compose`
 
-Run locally:
+Run in local mode for development:
+
+```shell
+$ make local
+```
+
+## Docker
+
+Build and run a local cluster with docker compose:
 
 ```shell
 $ make up
