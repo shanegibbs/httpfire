@@ -2,5 +2,5 @@
     "url": "http://127.0.0.1:8080",
     "timeout": 1000000000,
     "threadCount": 4,
-    "logRequests": true
+    "logRequests": false
 }

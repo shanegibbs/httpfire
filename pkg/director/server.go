@@ -3,6 +3,7 @@ package director
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -12,30 +13,25 @@ import (
 	"github.com/shanegibbs/httpfire/pkg/agent"
 )
 
-func DefaultServerConfig() ServerConfig {
-	return ServerConfig{
+func DefaultServerConfig() Config {
+	return Config{
 		ListenAddr: "0.0.0.0:8080",
-		AgentEndpoints: []string{
-			"http://127.0.0.1:8081",
-			"http://127.0.0.1:8082",
-		},
 	}
 }
 
-func Main(ctx context.Context, shutdown context.CancelFunc, serverConfig ServerConfig) error {
-	director := NewDirector(ctx, shutdown, serverConfig)
+func Main(ctx context.Context, shutdown context.CancelFunc, config Config) error {
+	log.Printf("using config: %v", config)
 
-	for _, ep := range serverConfig.AgentEndpoints {
-		err := director.AddAgent(ep)
-		if err != nil {
-			return err
-		}
+	director := NewDirector(ctx, shutdown, config)
+	err := director.StartDiscovery()
+	if err != nil {
+		return fmt.Errorf("failed to start discovery: %v", err)
 	}
 
-	return RunDirectorServer(ctx, serverConfig, director)
+	return RunDirectorServer(ctx, config, director)
 }
 
-func RunDirectorServer(ctx context.Context, serverConfig ServerConfig, director *Director) error {
+func RunDirectorServer(ctx context.Context, config Config, director *Director) error {
 
 	mux := http.NewServeMux()
 
@@ -74,8 +70,12 @@ func RunDirectorServer(ctx context.Context, serverConfig ServerConfig, director 
 		}
 	})
 
+	if config.ListenAddr == "" {
+		return fmt.Errorf("listen_addr config is empty")
+	}
+
 	srv := &http.Server{
-		Addr:    serverConfig.ListenAddr,
+		Addr:    config.ListenAddr,
 		Handler: logRequestHandler(mux),
 	}
 

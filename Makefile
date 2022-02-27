@@ -18,13 +18,16 @@ agent:
 	go run ./cmd/agent/main.go
 
 director:
-	go run ./cmd/director/main.go
+	HTTPFIRE_CONFIG=examples/director/config.yaml go run ./cmd/director/main.go
 
-build:
+docker:
 	docker build -t $(IMAGE) .
 
-run:
-	docker run --rm $(IMAGE)
+up:
+	docker-compose up --force-recreate --build
+
+down:
+	docker-compose down
 
 apply:
 	$(KUBECTL) apply -f resources
@@ -42,7 +45,7 @@ curl-post-%:
 	$(CURL) -XPOST http://$(LISTEN_ADDR)/$*
 
 post-start:
-	$(CURL) --data @examples/default.json http://$(LISTEN_ADDR)/start
+	$(CURL) --data @examples/plans/default.json http://$(LISTEN_ADDR)/start
 
 ignore-overrides-file:
 	git update-index --assume-unchanged Makefile.overrides.mk
