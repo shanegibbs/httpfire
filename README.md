@@ -8,6 +8,7 @@ Requires:
 - `docker`
 - `docker-compose`
 - `make`
+- `go >= 1.17.6`
 
 Run locally:
 
