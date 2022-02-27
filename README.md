@@ -2,13 +2,10 @@
 
 Accurately test your web infrastructure. Understand your limits and failure scenarios. Test and validate scaling strategies.
 
-Agent
-- Start
-- Stop
-- Update config (restart)
+## Development
 
-Director (push model)
-- Broadcast
-  - Start
-  - Stop
-  - Update config (restart)
+Run locally:
+
+```shell
+$ make up
+```
