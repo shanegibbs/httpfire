@@ -18,6 +18,18 @@ Run locally:
 $ make up
 ```
 
+Start a test plan:
+
+```shell
+$ make post-start
+```
+
+Stop current test plan:
+
+```shell
+$ make post-stop
+```
+
 Cleanup (remove docker containers etc):
 
 ```shell
