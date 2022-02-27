@@ -47,5 +47,7 @@ curl-post-%:
 post-start:
 	$(CURL) --data @examples/plans/default.json http://$(LISTEN_ADDR)/start
 
+clean: down
+
 ignore-overrides-file:
 	git update-index --assume-unchanged Makefile.overrides.mk
