@@ -57,5 +57,24 @@ func (a *RemoteAgent) Start(config AgentConfig) error {
 
 func (a *RemoteAgent) Stop() error {
 	log.Printf("Sending stop command to %v", a.endpoint)
+
+	url := *a.endpoint
+	url.Path = path.Join(url.Path, "stop")
+
+	req, err := http.NewRequestWithContext(a.ctx, "POST", url.String(), nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := a.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %v", err)
+	}
+	if res.StatusCode != 200 {
+		return fmt.Errorf("agent responded with failure (%s): %v", url.String(), res.Status)
+	}
+
 	return nil
 }

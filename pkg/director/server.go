@@ -89,7 +89,8 @@ func RunDirectorServer(ctx context.Context, serverConfig ServerConfig, director 
 	<-ctx.Done()
 	log.Print("Director shutting down...")
 
-	shutdownCtx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
 	return srv.Shutdown(shutdownCtx)
 }
 

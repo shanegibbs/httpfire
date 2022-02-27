@@ -108,7 +108,8 @@ func RunAgentServer(ctx context.Context, serverConfig ServerConfig, agent *Local
 	<-ctx.Done()
 	log.Print("Agent shutting down...")
 
-	shutdownCtx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
 	return srv.Shutdown(shutdownCtx)
 }
 
