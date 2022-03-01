@@ -114,6 +114,8 @@ func (a *LocalAgent) ExecuteOperation(ctx context.Context, id, i uint, client *h
 		return err
 	}
 
+	req.Header.Set("User-Agent", "httpfire/0.0")
+
 	start := time.Now()
 	res, err := client.Do(req)
 	latency := time.Since(start)
