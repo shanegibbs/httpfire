@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -24,12 +25,11 @@ type LocalAgent struct {
 	config      AgentConfig
 }
 
-func NewAgent(ctx context.Context, cancel context.CancelFunc, config AgentConfig) *LocalAgent {
+func NewAgent(ctx context.Context, cancel context.CancelFunc) *LocalAgent {
 	return &LocalAgent{
 		ctx:         ctx,
 		agentAbort:  cancel,
 		stopSession: nil,
-		config:      config,
 	}
 }
 
@@ -118,15 +118,21 @@ func (a *LocalAgent) WorkerFunc(id uint, ctx context.Context) error {
 }
 
 func (a *LocalAgent) ExecuteOperation(ctx context.Context, id, i uint, client *http.Client) error {
-	reqCtx, cancel := context.WithTimeout(ctx, a.config.Timeout)
+	reqConfig := a.config.Request
+
+	reqCtx, cancel := context.WithTimeout(ctx, reqConfig.Timeout)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(reqCtx, "GET", a.config.URL, nil)
+	body := strings.NewReader(reqConfig.Body)
+	req, err := http.NewRequestWithContext(reqCtx, reqConfig.Method, reqConfig.URL, body)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("User-Agent", "httpfire/0.0")
+	for k, v := range reqConfig.Headers {
+		req.Header.Set(k, v)
+	}
 
 	start := time.Now()
 	res, err := client.Do(req)
@@ -141,7 +147,7 @@ func (a *LocalAgent) ExecuteOperation(ctx context.Context, id, i uint, client *h
 	} else if err != nil {
 		msg = fmt.Sprintf("error: %v", err)
 	} else {
-		msg = fmt.Sprintf("%s %s %v", a.config.URL, res.Status, latency)
+		msg = fmt.Sprintf("%s %s %v", reqConfig.URL, res.Status, latency)
 		statusCode = res.StatusCode
 	}
 

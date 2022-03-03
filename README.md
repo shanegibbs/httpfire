@@ -45,3 +45,16 @@ Cleanup (remove docker containers etc)
 ```shell
 $ make clean
 ```
+
+## Notes
+
+Problem
+
+- Agents can overwhelm the OS and be unable to open or accept new connections.
+- This breaks communication between the agent and any other service, including the director and prometheus.
+
+Solution
+
+- Agents connect back to director and maintain connection on a "command channel"
+- Agents send stats to director
+- Agents exit if connection is broken

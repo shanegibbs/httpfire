@@ -14,14 +14,21 @@ func main() {
 	common.HandleSigterm(shutdown)
 
 	config := agent.AgentConfig{
-		URL:                "http://localhost:9090",
-		Timeout:            1 * time.Second,
+		Request: agent.Request{
+			URL:    "http://localhost:9090",
+			Method: "GET",
+			Headers: map[string]string{
+				"HttpFire-Session": "1",
+			},
+			Body:    "",
+			Timeout: 1 * time.Second,
+		},
 		ThreadCount:        1,
 		RateLimitPerSecond: 0.5,
 		LogRequests:        true,
 	}
 
-	agent := agent.NewAgent(ctx, shutdown, config)
+	agent := agent.NewAgent(ctx, shutdown)
 	agent.Start(config)
 
 	<-ctx.Done()

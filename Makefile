@@ -56,4 +56,7 @@ ignore-overrides-file:
 	git update-index --assume-unchanged Makefile.overrides.mk
 
 nginx:
-	docker run --name httpfire-nginx -p 9090:80 nginx
+	docker run --rm --name httpfire-nginx -p 9090:80 nginx
+
+http-echo:
+	docker run --rm --name httpfire-echo -p 9090:80 mendhak/http-https-echo

@@ -18,15 +18,7 @@ func DefaultServerConfig() ServerConfig {
 }
 
 func Main(ctx context.Context, shutdown context.CancelFunc, serverConfig ServerConfig) error {
-
-	config := AgentConfig{
-		URL:         "",
-		Timeout:     1 * time.Second,
-		ThreadCount: 4,
-		LogRequests: true,
-	}
-
-	agent := NewAgent(ctx, shutdown, config)
+	agent := NewAgent(ctx, shutdown)
 	return RunAgentServer(ctx, serverConfig, agent)
 }
 
