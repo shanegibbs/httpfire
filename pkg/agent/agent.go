@@ -129,6 +129,10 @@ func (a *LocalAgent) ExecuteOperation(ctx context.Context, id, i uint, client *h
 		return err
 	}
 
+	if len(reqConfig.Host) > 0 {
+		req.Host = reqConfig.Host
+	}
+
 	req.Header.Set("User-Agent", "httpfire/0.0")
 	for k, v := range reqConfig.Headers {
 		req.Header.Set(k, v)

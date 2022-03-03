@@ -16,6 +16,7 @@ func main() {
 	config := agent.AgentConfig{
 		Request: agent.Request{
 			URL:    "http://localhost:9090",
+			Host:   "example.com",
 			Method: "GET",
 			Headers: map[string]string{
 				"HttpFire-Session": "1",
