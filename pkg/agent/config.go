@@ -15,6 +15,7 @@ type AgentConfig struct {
 
 type Request struct {
 	URL     string            `json:"url"`
+	Host    string            `json:"host"`
 	Method  string            `json:"method"`
 	Body    string            `json:"body"`
 	Headers map[string]string `json:"headers"`

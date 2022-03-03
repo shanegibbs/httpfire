@@ -1,7 +1,8 @@
 {
     "request": {
+        "url": "http://127.0.0.1:9000",
         "method": "GET",
-        "url": "http://127.0.0.1:8080",
+        "host": "example.com",
         "headers": {
             "Httpfire-Session": "1"
         },
