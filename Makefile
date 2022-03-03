@@ -14,6 +14,9 @@ test:
 local:
 	go run ./cmd/local/main.go
 
+single:
+	go run ./cmd/single/main.go
+
 agent:
 	go run ./cmd/agent/main.go
 
@@ -51,3 +54,6 @@ clean: down
 
 ignore-overrides-file:
 	git update-index --assume-unchanged Makefile.overrides.mk
+
+nginx:
+	docker run --name httpfire-nginx -p 9090:80 nginx

@@ -84,6 +84,16 @@ var (
 	})
 )
 
+func (a *LocalAgent) calculateWaitTime(requestDuration time.Duration) time.Duration {
+	if a.config.RateLimitPerSecond == 0 {
+		return time.Duration(0)
+	}
+
+	nanoSecondsPerRequst := (1.0 / a.config.RateLimitPerSecond) * 1000000000.0
+	durationPerRequest := time.Duration(nanoSecondsPerRequst)
+	return durationPerRequest - requestDuration
+}
+
 func (a *LocalAgent) WorkerFunc(id uint, ctx context.Context) error {
 	var i uint
 	client := &http.Client{}
@@ -91,6 +101,8 @@ func (a *LocalAgent) WorkerFunc(id uint, ctx context.Context) error {
 	log.Printf("Starting worker func loop %v", id)
 
 	for {
+		start := time.Now()
+
 		if err := a.ExecuteOperation(ctx, id, i, client); err != nil {
 			return err
 		}
@@ -98,7 +110,7 @@ func (a *LocalAgent) WorkerFunc(id uint, ctx context.Context) error {
 		i++
 
 		select {
-		case <-time.After(1000 * time.Millisecond):
+		case <-time.After(a.calculateWaitTime(time.Since(start))):
 		case <-ctx.Done():
 			return ctx.Err()
 		}
