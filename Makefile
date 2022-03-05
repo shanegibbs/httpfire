@@ -27,10 +27,10 @@ docker:
 	docker build -t $(IMAGE) .
 
 up:
-	docker-compose up --force-recreate --build
+	docker-compose --project-name httpfire up --force-recreate --build
 
 down:
-	docker-compose down
+	docker-compose --project-name down
 
 apply:
 	$(KUBECTL) apply -f resources

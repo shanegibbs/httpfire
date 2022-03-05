@@ -17,3 +17,7 @@ services:
     deploy:
       mode: replicated
       replicas: 4
+  nginx:
+    image: nginx
+    ports:
+    - "9000:80"

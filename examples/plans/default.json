@@ -1,6 +1,6 @@
 {
     "request": {
-        "url": "http://127.0.0.1:9000",
+        "url": "http://httpfire-nginx-1",
         "method": "GET",
         "host": "example.com",
         "headers": {
@@ -9,6 +9,6 @@
         "timeout": 1000000000
     },
     "threadCount": 4,
-    "logRequests": false,
+    "logRequests": true,
     "rateLimitPerSecond": 1
 }
